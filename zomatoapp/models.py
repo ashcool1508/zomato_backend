@@ -62,15 +62,16 @@ class FoodItem(models.Model):
     price = models.FloatField(blank=True, null=True)
     food_type = models.CharField(max_length=122, null=True)
     cuisine = models.CharField(max_length=122, null=True)
+    combo = models.BooleanField(default=False)
 
 class FoodItemAdmin(admin.ModelAdmin):
-    list_display = ('food_id','res_menu_id','food_name','price','food_type','cuisine')
+    list_display = ('food_id','res_menu_id','food_name','price','food_type','cuisine','combo')
 
 class Tags(models.Model):
     food_item_tags = models.ForeignKey(FoodItem, on_delete=models.CASCADE, null=True)
     tag = models.CharField(max_length=122, null=True)
 
-class TagAdmin(admin.ModelAdmin):
+class TagsAdmin(admin.ModelAdmin):
     list_display = ('food_item_tags','tag')
 
 
