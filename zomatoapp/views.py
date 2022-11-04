@@ -30,86 +30,20 @@ class ResfoodItemsList(APIView):
         except Exception as e:
             print(e)
             return JsonResponse({"response": False}, status=400)
-# class ActivityForUser(APIView):
-#     def get(self, request):
-#         try:
-#             user_id = request.query_params['user_id']
-#             activity_data = Activity.objects.filter(user=user_id)
-#             serializer = ActivitySerializer(activity_data, many=True)
-#             return JsonResponse({"response": serializer.data}, status=200)
-#         except Exception as e:
-#             print(e)
-#             return JsonResponse({"response": False}, status=400)
-#
-# class Tags(APIView):
-#     def post(self, request):
-#         try:
-#             file = request.FILES['file']
-#             df = pd.read_excel(file)
-#             sensorandtags = list(zip(df['Sensor'].fillna(""), df['TAG'].fillna("")))
-#             return JsonResponse({"response": sensorandtags}, status=200)
-#         except Exception as e:
-#             print(e)
-#             return JsonResponse({"response": False}, status=400)
-#
-# class AlertData(APIView):
-#     def get(self, request):
-#         try:
-#             user_id = request.query_params['id']
-#             alert_data = Alert.objects.filter(user = user_id)
-#             # alert_data = Alert.objects.all()
-#             serializer = AlertSerializer(alert_data, many=True)
-#             return JsonResponse({"response": serializer.data}, status=200)
-#         except Exception as e:
-#             print(e)
-#             return JsonResponse({"response": False}, status=400)
-#     def post(self, request):
-#         try:
-#             equipment_name = request.data['equipment_name']
-#             timestamp = request.data['timestamp']
-#             location = request.data['location']
-#             description = request.data['description']
-#             resource = request.data['resource']
-#             resource_manager = request.data['resource_manager']
-#             area_in_charge = request.data['areaInCharge']
-#             aLert_data = Alert(equipment_name=equipment_name, timestamp=timestamp, location=location, description=description,
-#                                resource=resource, resource_manager=resource_manager, area_in_charge=area_in_charge)
-#             aLert_data.save()
-#             return JsonResponse({"response": True}, status=200)
-#         except Exception as e:
-#             print(e)
-#             return JsonResponse({"response": False}, status=400)
-#
-#
-# class EquipmentData(APIView):
-#     def get(self, request):
-#         try:
-#             user_id = request.query_params['id']
-#             equipment_Data = Equipment.objects.filter(user=user_id)
-#             # equipment_Data = Equipment.objects.all()
-#             serializer = EquipmentSerializer(equipment_Data, many=True)
-#             return JsonResponse({"equipment_detail": serializer.data}, status=200)
-#         except Exception as e:
-#             print(e)
-#             return JsonResponse({"response":False}, status=400)
-#
-#     def post(self, request):
-#         try:
-#             equipment_name = request.data['equipment_name']
-#             file = request.FILES['file']
-#             tags = request.data['tags']
-#             tags_to_string = " ".join(tags)
-#             user_tags_data = UserTags(tags=tags_to_string)
-#             user_tags_data.save()
-#             threshold = 1
-#             risk_signal = 1
-#             location = "pyro"
-#             equipment_data = Equipment(equipment_name=equipment_name, threshold=threshold, risk_signal=risk_signal,location=location)
-#             equipment_data.save()
-#             return JsonResponse({"response": True}, status=200)
-#         except Exception as e:
-#             print(e)
-#             return JsonResponse({"response": False}, status=400)
+class OrderUser(APIView):
+    def post(self, request):
+        try:
+            user_id = request.data['user_id']
+            res_id = request.data['res_id']
+            food_id = request.data['food_id']
+            user = NewUser.objects.get(id=user_id)
+            order = Order_placed(userdetail=user,resdet=res_id,fooddet=food_id)
+            order.save()
+            return JsonResponse({"response": True}, status=200)
+        except Exception as e:
+            print(e)
+            return JsonResponse({"response": False}, status=400)
+
 
 class LoginView(APIView):
     def get(self, request):

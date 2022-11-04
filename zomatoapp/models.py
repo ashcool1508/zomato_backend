@@ -52,8 +52,13 @@ class Rest(models.Model):
     res_id = models.AutoField(primary_key=True)
     res_name = models.CharField(max_length=122, null=True)
     location = models.CharField(max_length=122, default='Gurugram')
+    res_img = models.CharField(max_length=222,null=True)
+    rating = models.IntegerField(default=0)
+    delivery_time = models.CharField(max_length=122,null=True)
+    promo = models.CharField(max_length=122,null=True)
+    order_placed = models.BooleanField(default=False)
 class RestAdmin(admin.ModelAdmin):
-    list_display = ('res_id','res_name','location')
+    list_display = ('res_id','res_name','location' ,'res_img' ,'rating' ,'delivery_time' ,'promo','order_placed')
 
 class FoodItem(models.Model):
     res_menu_id = models.ForeignKey(Rest, on_delete=models.CASCADE, null=True)
@@ -63,10 +68,17 @@ class FoodItem(models.Model):
     food_type = models.CharField(max_length=122, null=True)
     cuisine = models.CharField(max_length=122, null=True)
     combo = models.BooleanField(default=False)
+    food_img = models.CharField(max_length=222,null=True)
 
 class FoodItemAdmin(admin.ModelAdmin):
-    list_display = ('food_id','res_menu_id','food_name','price','food_type','cuisine','combo')
+    list_display = ('food_id','res_menu_id','food_name','price','food_type','cuisine','combo','food_img')
 
+class Order_placed(models.Model):
+    userdetail = models.ForeignKey(NewUser, on_delete=models.CASCADE, null=True)
+    resdet = models.CharField(max_length=122,null=True)
+    fooddet = models.CharField(max_length=122,null=True)
+class Order_placedAdmin(admin.ModelAdmin):
+    list_display = ('userdetail','resdet','fooddet')
 class Tags(models.Model):
     food_item_tags = models.ForeignKey(FoodItem, on_delete=models.CASCADE, null=True)
     tag = models.CharField(max_length=122, null=True)
