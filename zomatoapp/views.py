@@ -7,15 +7,12 @@ from rest_framework.views import APIView
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
-from recommendation import foodrecommendation
 from .models import *
+from .recommendation import foodrecommendation
 from .serializers import *
-from .constants import Matrix
 
-emb_user = np.empty(0)
-emb_food = np.empty(0)
-user_ids = {}
-food_ids = {}
+
+
 class AllRes(APIView):
     def get(self, request):
         try:
@@ -45,51 +42,62 @@ class OrderUser(APIView):
             user = NewUser.objects.get(id=user_id)
             order = Order_placed(userdetail=user,resdet=res_id,fooddet=food_id)
             order.save()
-            df = pd.read_csv("new_reviews.csv")
-            new_df = df[["ProductId", "UserId", "Score"]]
-            found = False
-            for ind in new_df.index:
-                if new_df['ProductId'][ind]== food_id and new_df['UserId'][ind]== user_id :
-                     new_df['Score'][ind] += 1
-                     found = True
-            if not found:
-                new_row = {'ProductId': food_id, 'UserId':user_id, 'Score': 1}
-                new_df = new_df.append(new_row, ignore_index=True)
-
-            emb_user, emb_food, user_ids, food_ids = foodrecommendation()
+            # df = pd.read_csv("new_reviews.csv")
+            # new_df = df[["ProductId", "UserId", "Score"]]
+            # found = False
+            # for ind in new_df.index:
+            #     if new_df['ProductId'][ind] == food_id and new_df['UserId'][ind] == user_id:
+            #          new_df['Score'][ind] += 1
+            #          found = True
+            # if not found:
+            #     new_row = {'ProductId': food_id, 'UserId': user_id, 'Score': 1}
+            #     new_df = new_df.append(new_row, ignore_index=True)
+            # global emb_user, emb_food, user_ids, food_ids
+            # emb_user, emb_food, user_ids, food_ids = foodrecommendation()
 
             return JsonResponse({"response": True}, status=200)
         except Exception as e:
             print(e)
             return JsonResponse({"response": False}, status=400)
 
-def get_recommandation(user_id, num_recommadations):
-        print(type(user_id))
-        print(user_ids)
-        print([user_ids[list(user_ids.keys())
-        [list(user_ids.values()).index(user_id)]]])
-        ratings_predicted = np.matmul(np.reshape(emb_user[user_ids[list(user_ids.keys())
-        [list(user_ids.values()).index(user_id)]]], (1, 5)), np.transpose(emb_food))
-        print(ratings_predicted)
-        recommanded_index = ratings_predicted[0].argsort()[-num_recommadations:][::-1]
-        for i in range(5):
-            recommanded_index[i] = user_ids[recommanded_index[i]]
-        return recommanded_index
+def get_recommandation(user_id,emb_user,emb_food,user_ids,food_ids, num_recommadations):
+    ratings_predicted = np.matmul(np.reshape(emb_user[user_ids[list(user_ids.keys())
+    [list(user_ids.values()).index(user_id)]]], (1, 5)), np.transpose(emb_food))
+    recommanded_index = ratings_predicted[0].argsort()[-num_recommadations:][::-1]
+    for i in range(5):
+        recommanded_index[i] = food_ids[recommanded_index[i]]
+    return recommanded_index
+
+# def get_recommandation(user_id, emb_user, emb_food, num_recommadations):
+#       ratings_predicted = np.matmul(np.reshape(emb_user[user_ids[list(user_ids.keys())
+#           [list(user_ids.values()).index(user_id)]]], (1, 5)), np.transpose(emb_food))
+#       recommanded_index = ratings_predicted[0].argsort()[-num_recommadations:][::-1]
+#       for i in range(5):
+#         recommanded_index[i] = food_ids[recommanded_index[i]]
+#       return recommanded_index
+#
+#     for i in range(5):
+#       print(get_recommandation(i, emb_user, emb_food, 10))
 class GetRecommendation(APIView):
 
     def post(self, request):
         try:
             user_id = request.data['user_id']
-            recommended = get_recommandation(user_id=int(user_id), num_recommadations=5)
-            print(recommended)
+            emb_user, emb_food, user_ids, food_ids = foodrecommendation()
+            recommended = get_recommandation(user_id=int(user_id),emb_user=emb_user,emb_food=emb_food,user_ids=user_ids,
+                                             food_ids=food_ids ,num_recommadations=5)
+            print(type(recommended))
+
+            # foodrecommendation()
             foodslist = []
             for i in recommended:
-                food_id = i
-                food = FoodItem.objects.filter(food_id)
+                food_id = str(i)
+                print(type(food_id))
+                food = FoodItem.objects.filter(food_id=food_id)
                 serializer = FoodSerializer(food, many=True)
                 foodslist.append(serializer.data)
             print(foodslist)
-            return JsonResponse({"response": foodslist}, status=200)
+            return JsonResponse({"response": True}, status=200)
         except Exception as e:
             print(e)
             return JsonResponse({"response": False}, status=400)
