@@ -60,12 +60,14 @@ class LoginView(APIView):
             data = {
                 'id':user_id,
                 'email':user_email,
+                'username':user.username,
             }
             return JsonResponse({"message":"verified", "user":data}, status=200)
         else:
             return JsonResponse({"message":"incorrect otp"}, status=200)
     def post(self, request):
         email = request.data['email']
+        username = request.data['username']
         # def sendotpfinal(email):
         #     otp = int((random.uniform(0, 1))*100000)
         #     # print(otp)
@@ -90,16 +92,18 @@ class LoginView(APIView):
             data = {
                 "id": user.id,
                 "email": user.email,
+                "username": user.username,
             }
             return JsonResponse(data, status=200)
         except Exception as e:
-            user_object = NewUser(email=email)
+            user_object = NewUser(email=email,username=username)
             user_object.save()
             print(user_object)
             user_email = user_object.email
             data = {
                 "id": user_object.id,
                 "email": user_email,
+                "username":user_object.username
             }
             return JsonResponse(data, status=200)
 def sendotp(email, otp):
